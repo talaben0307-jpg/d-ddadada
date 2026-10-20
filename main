@@ -1,4 +1,4 @@
--- [[ ZELYNX SMART EGG PROTECTOR - ANTI LAG PRO V2 ]]
+-- [[ ZELYNX SMART EGG PROTECTOR - CUSTOM RGB MENU ]]
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -7,25 +7,38 @@ local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
 -- ==========================================
--- 1. HÀM TỰ ĐỘNG TÌM & BẤM NÚT EXIT SIÊU TỐC
+-- 1. DỌN DẸP GIAO DIỆN CŨ (TRÁNH TRÙNG LẶP)
+-- ==========================================
+local uiName = "ZelynxEggProtector"
+if CoreGui:FindFirstChild(uiName) then 
+    CoreGui[uiName]:Destroy() 
+end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = uiName
+ScreenGui.Parent = (gethui and gethui()) or CoreGui
+
+-- ==========================================
+-- 2. HÀM TỰ ĐỘNG BẤM NÚT EXIT SIÊU TỐC
 -- ==========================================
 local function emergencyExit()
     local playerGui = LocalPlayer:WaitForChild("PlayerGui")
     for _, gui in pairs(playerGui:GetDescendants()) do
         if gui:IsA("TextButton") or gui:IsA("ImageButton") then
-            -- Nhận diện nút có chữ Exit
+            -- Nhận diện nút có chữ Exit hoặc tên là Exit
             if gui.Name:lower():match("exit") or (gui:IsA("TextButton") and gui.Text:lower():match("exit")) then
                 if firesignal then
                     firesignal(gui.MouseButton1Click)
                     firesignal(gui.MouseButton1Down)
                     firesignal(gui.MouseButton1Up)
                 else
+                    -- Dự phòng cho các Executor không hỗ trợ firesignal
                     local GuiService = game:GetService("GuiService")
                     GuiService.SelectedCoreObject = gui
                     game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.Return, false, game)
                     game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.Return, false, game)
                 end
-                print("🚨 ĐÃ BẤM EXIT KHẨN CẤP! BẢO VỆ TRỨNG THÀNH CÔNG!")
+                print("🚨 ĐÃ BẤM NÚT EXIT KHẨN CẤP!")
                 return true
             end
         end
@@ -34,48 +47,45 @@ local function emergencyExit()
 end
 
 -- ==========================================
--- 2. TẠO MENU RGB SIÊU NGẦU (UI)
+-- 3. XÂY DỰNG GIAO DIỆN (UI) CUSTOM RGB
 -- ==========================================
-local uiName = "ZelynxSmartEgg"
-if CoreGui:FindFirstChild(uiName) then CoreGui[uiName]:Destroy() end
-
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = uiName
-ScreenGui.Parent = (gethui and gethui()) or CoreGui
-
--- Nút nổi (Floating)
+-- Nút Lơ Lửng (Floating Button)
 local FloatBtn = Instance.new("TextButton")
-FloatBtn.Size = UDim2.new(0, 55, 0, 55)
-FloatBtn.Position = UDim2.new(0, 20, 0.5, -27)
-FloatBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-FloatBtn.Text = "🚨"
+FloatBtn.Size = UDim2.new(0, 50, 0, 50)
+FloatBtn.Position = UDim2.new(0, 20, 0.5, -25)
+FloatBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+FloatBtn.Text = "🥚"
 FloatBtn.TextSize = 25
 FloatBtn.Parent = ScreenGui
 Instance.new("UICorner", FloatBtn).CornerRadius = UDim.new(1, 0)
 local FloatStroke = Instance.new("UIStroke", FloatBtn)
-FloatStroke.Thickness = 3
+FloatStroke.Thickness = 2.5
 
 -- Menu Chính
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 320, 0, 180)
 MainFrame.Position = UDim2.new(0.5, -160, 0.5, -90)
 MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
-MainFrame.Visible = false
 MainFrame.ClipsDescendants = true
+MainFrame.Visible = false
 MainFrame.Parent = ScreenGui
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 local MainStroke = Instance.new("UIStroke", MainFrame)
-MainStroke.Thickness = 3
+MainStroke.Thickness = 2.5
 
+-- Tiêu đề Menu
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Size = UDim2.new(1, -40, 0, 40)
+Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "SMART EGG PROTECTOR"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 16
 Title.TextColor3 = Color3.new(1, 1, 1)
+Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = MainFrame
 
+-- Nút Tắt Menu
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Size = UDim2.new(0, 40, 0, 40)
 CloseBtn.Position = UDim2.new(1, -40, 0, 0)
@@ -86,7 +96,7 @@ CloseBtn.TextSize = 16
 CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
 CloseBtn.Parent = MainFrame
 
--- Trạng thái quét
+-- Trạng thái Quét
 local StatusLabel = Instance.new("TextLabel")
 StatusLabel.Size = UDim2.new(1, 0, 0, 20)
 StatusLabel.Position = UDim2.new(0, 0, 0, 45)
@@ -97,6 +107,7 @@ StatusLabel.TextSize = 13
 StatusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
 StatusLabel.Parent = MainFrame
 
+-- Nút Bật/Tắt Auto Quét
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Size = UDim2.new(0.8, 0, 0, 45)
 ToggleBtn.Position = UDim2.new(0.1, 0, 0, 80)
@@ -111,8 +122,117 @@ local ToggleStroke = Instance.new("UIStroke", ToggleBtn)
 ToggleStroke.Color = Color3.fromRGB(255, 50, 50)
 ToggleStroke.Thickness = 2
 
+-- Hướng dẫn phím tắt
 local KeybindInfo = Instance.new("TextLabel")
 KeybindInfo.Size = UDim2.new(1, 0, 0, 20)
 KeybindInfo.Position = UDim2.new(0, 0, 1, -25)
 KeybindInfo.BackgroundTransparency = 1
-KeybindInfo.Text = "
+KeybindInfo.Text = "Phím ẩn/hiện Menu: RightControl"
+KeybindInfo.Font = Enum.Font.Gotham
+KeybindInfo.TextSize = 11
+KeybindInfo.TextColor3 = Color3.fromRGB(100, 100, 100)
+KeybindInfo.Parent = MainFrame
+
+-- ==========================================
+-- 4. HIỆU ỨNG VÀ KÉO THẢ (DRAG & TWEEN)
+-- ==========================================
+local function makeDraggable(gui)
+    local dragging, dragStart, startPos
+    gui.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true; dragStart = input.Position; startPos = gui.Position
+        end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+    end)
+end
+
+makeDraggable(FloatBtn)
+makeDraggable(MainFrame)
+
+-- Hiệu ứng ẩn/hiện mượt mà
+local function toggleUI()
+    if MainFrame.Visible then
+        local tween = TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 320, 0, 0)})
+        tween:Play()
+        tween.Completed:Wait()
+        MainFrame.Visible = false
+        FloatBtn.Visible = true
+    else
+        MainFrame.Size = UDim2.new(0, 320, 0, 0)
+        MainFrame.Visible = true
+        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 320, 0, 180)}):Play()
+        FloatBtn.Visible = false
+    end
+end
+
+FloatBtn.MouseButton1Click:Connect(toggleUI)
+CloseBtn.MouseButton1Click:Connect(toggleUI)
+
+UIS.InputBegan:Connect(function(input, gp)
+    if not gp and input.KeyCode == Enum.KeyCode.RightControl then toggleUI() end
+end)
+
+-- Viền RGB tự động đổi màu
+RunService.RenderStepped:Connect(function()
+    local rgb = Color3.fromHSV(tick() % 3 / 3, 1, 1)
+    MainStroke.Color = rgb
+    FloatStroke.Color = rgb
+    Title.TextColor3 = rgb
+end)
+
+-- ==========================================
+-- 5. LOGIC AUTO QUÉT & ĐỌC DỮ LIỆU
+-- ==========================================
+local isScanning = false
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    isScanning = not isScanning
+    
+    if isScanning then
+        ToggleBtn.Text = "BẬT QUÉT KHẨN CẤP: ON"
+        ToggleBtn.TextColor3 = Color3.fromRGB(50, 255, 100)
+        ToggleStroke.Color = Color3.fromRGB(50, 255, 100)
+        StatusLabel.Text = "📡 Đang theo dõi sức chứa của trứng..."
+        StatusLabel.TextColor3 = Color3.fromRGB(50, 255, 100)
+        
+        task.spawn(function()
+            -- Vòng lặp quét an toàn chống lag
+            while isScanning do
+                task.wait(0.03) 
+                
+                -- [[ KHU VỰC CẬU NHẬP ĐƯỜNG DẪN DEX EXPLORER ]] --
+                -- Dưới đây là 2 kịch bản phổ biến nhất, cậu bỏ dấu (--) ở kịch bản đúng với game của cậu nhé:
+                
+                -- KỊCH BẢN 1: Quét chữ "Warning" hoặc trứng chuyển màu
+                -- local eggMesh = workspace.Incubator.CurrentEgg.MeshPart
+                -- if eggMesh.BrickColor == BrickColor.new("Really red") then
+                --     emergencyExit()
+                --     task.wait(2) -- Nghỉ 2s sau khi bấm để tránh spam
+                -- end
+                
+                -- KỊCH BẢN 2: Game có con số hiển thị sức chứa (VD: Sắp đầy 100%)
+                -- local currentProgress = workspace.CurrentEgg.Progress.Value
+                -- local maxLimit = workspace.CurrentEgg.MaxLimit.Value
+                -- if currentProgress >= (maxLimit - 1) then
+                --     emergencyExit()
+                --     task.wait(2)
+                -- end
+                
+            end
+        end)
+    else
+        ToggleBtn.Text = "BẬT QUÉT KHẨN CẤP: OFF"
+        ToggleBtn.TextColor3 = Color3.new(1, 1, 1)
+        ToggleStroke.Color = Color3.fromRGB(255, 50, 50)
+        StatusLabel.Text = "📡 Trạng thái: Đã tắt quét."
+        StatusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+    end
+end)
