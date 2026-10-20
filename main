@@ -1,0 +1,82 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "🥚 Egg Incubator Pro",
+   LoadingTitle = "Đang tải hệ thống tự động...",
+   LoadingSubtitle = "Menu RGB siêu mượt",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = "ZelynxHub",
+      FileName = "AutoEggConfig"
+   },
+   KeySystem = false
+})
+
+local Tab = Window:CreateTab("Tự động Ấp (Auto)", 4483362458)
+local isAutoing = false
+local safeLimit = 90 -- Ngưỡng an toàn (Ví dụ: 90%)
+
+Tab:CreateToggle({
+   Name = "Bật Auto (Tự dừng trước khi trứng nổ)",
+   CurrentValue = false,
+   Flag = "AutoIncubate",
+   Callback = function(Value)
+       isAutoing = Value
+       
+       if isAutoing then
+           task.spawn(function()
+               while isAutoing do
+                   task.wait(0.05) -- Tốc độ kiểm tra liên tục
+                   
+                   -- ==========================================
+                   -- [[ TÌM THÔNG SỐ NÀY BẰNG DEX EXPLORER ]]
+                   -- Giả sử thông số độ to của trứng (hoặc multiplier) là:
+                   -- local eggProgress = workspace.Incubator.CurrentEgg.Progress.Value
+                   -- ==========================================
+                   
+                   -- MÔ PHỎNG LOGIC CHECK ĐỂ DỪNG ẤP:
+                   -- if eggProgress >= safeLimit then
+                   --     -- Đã đạt ngưỡng to tối đa an toàn -> DỪNG VÀ NHẬN TRỨNG!
+                   --     game:GetService("ReplicatedStorage").Remotes.CollectEgg:FireServer()
+                   --     
+                   --     Rayfield:Notify({
+                   --         Title = "Thành công!",
+                   --         Content = "Đã thu hoạch trứng an toàn ở mức " .. tostring(safeLimit) .. "!",
+                   --         Duration = 2,
+                   --         Image = 4483362458,
+                   --     })
+                   --     
+                   --     -- Đợi một chút để game reset lại trứng mới (ví dụ 2 giây)
+                   --     task.wait(2)
+                   --     
+                   --     -- Bỏ trứng mới vào lại máy ấp (nếu game cần thao tác này)
+                   --     -- game:GetService("ReplicatedStorage").Remotes.PutEgg:FireServer()
+                   -- end
+               end
+           end)
+       end
+   end,
+})
+
+Tab:CreateSlider({
+   Name = "Ngưỡng an toàn (Chỉ số dừng)",
+   Range = {1, 100}, -- Cậu tự chỉnh dải số này theo mức tối đa của trứng trong game nhé
+   Increment = 1,
+   Suffix = " Điểm/%",
+   CurrentValue = 90,
+   Flag = "SafeLimit",
+   Callback = function(Value)
+       safeLimit = Value
+   end,
+})
+
+-- Nút nổi (Keybind) để ẩn/hiện menu
+Tab:CreateKeybind({
+   Name = "Phím Ẩn/Hiện Menu",
+   CurrentKeybind = "RightShift",
+   HoldToInteract = false,
+   Flag = "ToggleUI",
+   Callback = function()
+       -- Rayfield có icon bánh răng để cài phím tắt ẩn/hiện menu
+   end,
+})
